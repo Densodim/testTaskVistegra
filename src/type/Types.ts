@@ -38,3 +38,7 @@ export type AllOrNone<T, Keys extends keyof T> = (
     | Required<Pick<T, Keys>>
     | Partial<Record<Keys, never>>
     ) & Split<T>
+
+export type Remap<T> = {
+    [K in keyof T]: T[K]
+}

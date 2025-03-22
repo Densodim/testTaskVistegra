@@ -44,22 +44,44 @@ export const Configuration = z.object({
     value: z.number().min(0).optional(),
 })
 
-
-
 export const calculatorAPI = createApi({
     reducerPath: 'calculatorApi',
     baseQuery: fetchBaseQuery({baseUrl: '/data/'}),
+    tagTypes: ["Materials", "Config"],
     endpoints: (builder) => ({
         getMaterials: builder.query<MaterialsType[], void>({
-            query: () => 'data.json'
+            query: () => 'data.json',
+            providesTags: [{type: "Materials", id: "LIST"}]
         }),
         getConfig: builder.query<ConfigurationType[], void>({
-            query: () => 'config.json'
+            query: () => 'config.json',
+            providesTags: [{type: "Config", id: "SETTINGS"}],
+        }),
+        updateConfig: builder.mutation<ConfigurationType, Partial<ConfigurationType> & { key: string }>({
+            query: ({key, ...patch}) => ({
+                url: `config.json`,
+                method: "POST",
+                body: {key, ...patch}
+            }),
+            invalidatesTags: [{type: "Config", id: "SETTINGS"}],
+            async onQueryStarted({key, ...patch}, {dispatch, queryFulfilled}) {
+                const patchResult = dispatch(
+                    calculatorAPI.util.updateQueryData('getConfig', undefined, (draft) => {
+                        const item = draft.find((config) => config.key === key);
+                        if (item) Object.assign(item, patch);
+                    })
+                )
+                try {
+                    await queryFulfilled;
+                } catch {
+                    patchResult.undo();
+                }
+            },
         })
     })
 })
 
-export const {useGetMaterialsQuery, useGetConfigQuery} = calculatorAPI;
+export const {useGetMaterialsQuery, useGetConfigQuery, useUpdateConfigMutation} = calculatorAPI;
 
 
 //types

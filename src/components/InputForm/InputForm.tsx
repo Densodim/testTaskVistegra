@@ -3,15 +3,25 @@ import {
     ConfigurationType,
     MaterialsType,
     useGetConfigQuery,
-    useGetMaterialsQuery
+    useGetMaterialsQuery, useUpdateConfigMutation
 } from "../../redux/services/calculatorApi.ts";
 import {AllOrNone} from "../../type/Types.ts";
+import {AComponentUsingInput} from "../../lib/Input/Input.tsx";
+import {useEffect, useState} from "react";
 
 
 function InputForm() {
 
     const {data: materials, error: materialsError, isLoading: materialsIsLoading} = useGetMaterialsQuery();
-    const {data: config, error: configError, isLoading: configIsLoading} = useGetConfigQuery()
+    const {data: config, error: configError, isLoading: configIsLoading} = useGetConfigQuery();
+
+    const [updateConfig] = useUpdateConfigMutation();
+
+
+    // const sizeConfig = config?.find((item)=>item.key === 'width');
+    // const minValue = sizeConfig?.min || 0;
+
+    // const [minConfig, setMinConfig] = useState<number>(minValue);
 
 
     // console.log('data', materials)
@@ -24,11 +34,36 @@ function InputForm() {
         })
     }
 
-    const getSizeConfig = (key: SizeConfigType): GetSizeConfigType => {
+    const getSizeConfig = (key: SizeConfigType): GetSizeConfigType | undefined => {
         const sizeConfig = config?.find((item) => item.type === 'size' && item.key === key);
-        return sizeConfig ? {min: sizeConfig.min, max: sizeConfig.max, step: sizeConfig.step} as GetSizeConfigType : {}
+        return sizeConfig ? {
+            min: sizeConfig.min ?? 0,
+            max: sizeConfig.max ?? 0,
+            step: sizeConfig.step ?? 0
+        } as GetSizeConfigType : undefined;
     }
 
+    const [form, setForm] = useState({
+        width: getSizeConfig("width")?.min ?? 0,
+        length: getSizeConfig("length")?.min ?? 0,
+        material: "",
+        pipe: "",
+        frame: "",
+    });
+
+    useEffect(() => {
+        setForm((prev) => ({
+            ...prev,
+            width: getSizeConfig("width")?.min ?? prev.width,
+            length: getSizeConfig("length")?.min ?? prev.length,
+        }));
+    }, [config]);
+
+    const handleChange = async (key: any, value: number) => {
+        setForm((prev) => ({...prev, [key]: value}));
+
+        await updateConfig({key, value});
+    };
 
     if (materialsIsLoading || configIsLoading) {
         return <div>Loading...</div>
@@ -50,11 +85,12 @@ function InputForm() {
                     </select>
 
                     <label>Ширина (м):</label>
-                    <input type='number' min={getSizeConfig('width').min} max={getSizeConfig('width').max}
-                           step={getSizeConfig('width').step}/>
+                    <AComponentUsingInput type={'number'} getSizeConfig={getSizeConfig('width')} value={form.width}
+                                          onChange={(value: number) => handleChange('width', value)}/>
 
                     <label>Длина (м):</label>
-                    <input type='number'/>
+                    <AComponentUsingInput type={'number'} getSizeConfig={getSizeConfig('length')} value={form.length}
+                                          onChange={(value: number) => handleChange('length', value)}/>
 
                     <label>выбор прочности:</label>
                     <select>
@@ -84,5 +120,5 @@ export default InputForm;
 type OptionSelectType = MaterialsType['type']
 type SizeConfigType = ConfigurationType['key']
 
-type GetSizeConfigType = AllOrNone<ConfigurationType, 'min' | 'max' | 'step'>
+export type GetSizeConfigType = AllOrNone<ConfigurationType, 'min' | 'max' | 'step'>
 

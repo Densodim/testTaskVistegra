@@ -1,8 +1,16 @@
-import {OnlyRequired} from "../../type/Types.ts";
 import {JSX} from "react";
+import {OnlyRequired, Remap} from "../../type/Types.ts";
+import {GetSizeConfigType} from "../../components/InputForm/InputForm.tsx";
 
-export function Input({...allProps}: InputProps) {
+
+function Input({...allProps}: InputProps) {
     return (<input {...allProps} />)
+}
+
+export function AComponentUsingInput({getSizeConfig, onChange, value, ...rest}: any) {
+    const {max, min, step} = getSizeConfig
+
+    return <Input value={value} onChange={(e) => onChange(e.target.value)} min={min} max={max} step={step} {...rest}/>
 }
 
 
@@ -15,6 +23,7 @@ type UncontrolledProps = Omit<JSX.IntrinsicElements['input'], 'value' | 'onChang
     defaultValue: string
     value?: never
     onChange?: never
+    getSizeConfig?: GetSizeConfigType
 }
 
-type InputProps = ControlledProps | UncontrolledProps
+type InputProps = Remap<ControlledProps | UncontrolledProps>
