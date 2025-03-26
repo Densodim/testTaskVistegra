@@ -1,6 +1,5 @@
 import './App.css'
 import InputForm from "./components/InputForm/InputForm.tsx";
-import Results from "./components/Results/Results.tsx";
 
 function App() {
 
@@ -11,9 +10,7 @@ function App() {
                     <div className='inputForm'>
                         <InputForm/>
                     </div>
-                    <div className='results'>
-                        <Results/>
-                    </div>
+
                 </div>
             </div>
         </>

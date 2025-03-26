@@ -1,13 +1,27 @@
 import styles from './Results.module.css';
+import {useGetConfigQuery, useGetMaterialsQuery, useGetSelectOptionsQuery} from "../../redux/services/calculatorApi.ts";
 
 const HEADER = {
-    name:'Наименование',
+    name: 'Наименование',
     unit: 'Единица',
     amount: 'Количество',
     sum: 'Сумма'
 } as const;
 
-function Results() {
+function Results({pipeValue}: Props) {
+
+    const {data: materials} = useGetMaterialsQuery();
+    const {data: config} = useGetConfigQuery();
+    const {data: selectOptions} = useGetSelectOptionsQuery();
+
+    console.log(selectOptions);
+
+
+    const selectList = materials?.find((el) => el.name === selectOptions?.listValue);
+    const selectPipe = materials?.find((el) => el.name === selectOptions?.listValue);
+
+    console.log('selectList', selectList);
+
     return (
         <>
             <div className={styles.resultsSection}>
@@ -23,10 +37,12 @@ function Results() {
                     </thead>
                     <tbody>
                     <tr>
-                        <td>Лист-12 0.5 ширина 1м</td>
+                        <td>{selectOptions?.listValue}</td>
+                        <td>{selectList?.unit}</td>
                     </tr>
                     <tr>
-                        <td>Труба 20х20</td>
+                        <td>{pipeValue}</td>
+                        <td>{selectPipe?.unit}</td>
 
                     </tr>
                     <tr>
@@ -48,3 +64,8 @@ function Results() {
 }
 
 export default Results;
+
+//Props
+type Props = {
+    pipeValue: string
+}

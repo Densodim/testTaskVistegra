@@ -3,11 +3,14 @@ import {
     ConfigurationType,
     MaterialsType,
     useGetConfigQuery,
-    useGetMaterialsQuery, useUpdateConfigMutation
+    useGetMaterialsQuery,
+    useUpdateConfigMutation,
+    useUpdateSelectOptionsMutation
 } from "../../redux/services/calculatorApi.ts";
 import {AllOrNone} from "../../type/Types.ts";
 import {AComponentUsingInput} from "../../lib/Input/Input.tsx";
 import {useEffect, useState} from "react";
+import Results from "../Results/Results.tsx";
 
 
 function InputForm() {
@@ -16,6 +19,12 @@ function InputForm() {
     const {data: config, error: configError, isLoading: configIsLoading} = useGetConfigQuery();
 
     const [updateConfig] = useUpdateConfigMutation();
+    const [updateSelectOptions] = useUpdateSelectOptionsMutation();
+
+    const [listValue, setListValue] = useState('');
+    const [pipeValue, setPipeValue] = useState('');
+    const [choiceOfFrame, setChoiceOfFrame] = useState('');
+    const [choiceOfMaterial, setChoiceOfMaterial] = useState('');
 
 
     // const sizeConfig = config?.find((item)=>item.key === 'width');
@@ -24,14 +33,41 @@ function InputForm() {
     // const [minConfig, setMinConfig] = useState<number>(minValue);
 
 
-    // console.log('data', materials)
-    // console.log('error', materialsError)
-    // console.log('isLoading', materialsIsLoading)
+    const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>, type: OptionSelectType) => {
+        const selectValue = event.target.value;
+        switch (type) {
+            case "list":
+                updateSelectOptions({listValue: selectValue});
+                setListValue(selectValue);
+                break;
+            case "pipe":
+                setPipeValue(selectValue)
+                break;
+            case "material":
+                setChoiceOfMaterial(selectValue)
+                break;
+            case "frame":
+                setChoiceOfFrame(selectValue)
+                break;
+        }
+    };
 
     const optionSelect = (type: OptionSelectType) => {
-        return materials?.filter((matetial) => matetial.type === type).map((item, index) => {
-            return <option key={index} value={item.type}>{item.name}</option>
-        })
+        switch (type) {
+            case 'list':
+            case 'pipe':
+            case 'fix':
+                return materials?.filter((matetial) => matetial.type === type).map((item, index) => {
+                    return <option key={index} value={item.name}>{item.name}</option>
+                })
+            case "frame":
+            case "material":
+            case "size":
+                return config?.filter((el) => el.type === type).map((item, index) => {
+                    return <option key={index} value={item.name}>{item.name}</option>
+                })
+
+        }
     }
 
     const getSizeConfig = (key: SizeConfigType): GetSizeConfigType | undefined => {
@@ -39,13 +75,14 @@ function InputForm() {
         return sizeConfig ? {
             min: sizeConfig.min ?? 0,
             max: sizeConfig.max ?? 0,
-            step: sizeConfig.step ?? 0
+            step: sizeConfig.step ?? 0,
+            value: sizeConfig.value ?? 0,
         } as GetSizeConfigType : undefined;
     }
 
     const [form, setForm] = useState({
         width: getSizeConfig("width")?.min ?? 0,
-        length: getSizeConfig("length")?.min ?? 0,
+        length: getSizeConfig("length")?.value ?? 0,
         material: "",
         pipe: "",
         frame: "",
@@ -57,12 +94,23 @@ function InputForm() {
             width: getSizeConfig("width")?.min ?? prev.width,
             length: getSizeConfig("length")?.min ?? prev.length,
         }));
+    }, []);
+
+    useEffect(() => {
+        setForm((prev) => ({
+            ...prev,
+            width: getSizeConfig("width")?.value ?? prev.width,
+            length: getSizeConfig("length")?.value ?? prev.length,
+        }));
     }, [config]);
 
     const handleChange = async (key: any, value: number) => {
         setForm((prev) => ({...prev, [key]: value}));
 
-        await updateConfig({key, value});
+        await updateConfig({
+            key,
+            value,
+        });
     };
 
     if (materialsIsLoading || configIsLoading) {
@@ -75,12 +123,12 @@ function InputForm() {
                 <div className={style.inputSection}>
 
                     <label>Покрытие:</label>
-                    <select>
+                    <select onChange={(e) => handleSelectChange(e, 'list')} value={listValue}>
                         {optionSelect('list')}
                     </select>
 
                     <label>Труба:</label>
-                    <select>
+                    <select onChange={(e) => handleSelectChange(e, 'pipe')} value={pipeValue}>
                         {optionSelect('pipe')}
                     </select>
 
@@ -92,12 +140,21 @@ function InputForm() {
                     <AComponentUsingInput type={'number'} getSizeConfig={getSizeConfig('length')} value={form.length}
                                           onChange={(value: number) => handleChange('length', value)}/>
 
-                    <label>выбор прочности:</label>
-                    <select>
+                    <label>выбор материала:</label>
+                    <select onChange={(e) => handleSelectChange(e, 'material')} value={choiceOfMaterial}>
+                        {optionSelect('material')}
+                    </select>
 
+                    <label>выбор прочности:</label>
+                    <select onChange={(e) => handleSelectChange(e, 'frame')} value={choiceOfFrame}>
+                        {optionSelect('frame')}
                     </select>
 
                     <button>Рассчитать</button>
+                </div>
+
+                <div className='results'>
+                    <Results pipeValue={pipeValue}/>
                 </div>
 
             </>
@@ -117,8 +174,8 @@ function InputForm() {
 export default InputForm;
 
 // types
-type OptionSelectType = MaterialsType['type']
+type OptionSelectType = MaterialsType['type'] | ConfigurationType['type']
 type SizeConfigType = ConfigurationType['key']
 
-export type GetSizeConfigType = AllOrNone<ConfigurationType, 'min' | 'max' | 'step'>
+export type GetSizeConfigType = AllOrNone<ConfigurationType, 'min' | 'max' | 'step' | 'value'>
 

@@ -1,5 +1,6 @@
 import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
 import {z} from "zod";
+import {Remap} from "../../type/Types.ts";
 
 
 export const Materials = z.object({
@@ -44,22 +45,40 @@ export const Configuration = z.object({
     value: z.number().min(0).optional(),
 })
 
+export const SelectsOptions = z.object({
+    listValue: z.string(),
+    pipeValue: z.string(),
+    choiceOfFrame: z.union([
+        z.literal('light'),
+        z.literal('standard'),
+        z.literal('strong')
+    ]),
+    choiceOfMaterial: z.union([
+        z.literal('metal'),
+        z.literal('plastic')
+    ])
+})
+
 export const calculatorAPI = createApi({
     reducerPath: 'calculatorApi',
-    baseQuery: fetchBaseQuery({baseUrl: '/data/'}),
-    tagTypes: ["Materials", "Config"],
+    baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:3001/'}),
+    tagTypes: ["Materials", "Config", "SelectsOptions"],
     endpoints: (builder) => ({
         getMaterials: builder.query<MaterialsType[], void>({
-            query: () => 'data.json',
+            query: () => 'materials',
             providesTags: [{type: "Materials", id: "LIST"}]
         }),
         getConfig: builder.query<ConfigurationType[], void>({
-            query: () => 'config.json',
+            query: () => `config`,
             providesTags: [{type: "Config", id: "SETTINGS"}],
+        }),
+        getSelectOptions: builder.query<SelectType, void>({
+            query: () => 'select',
+            providesTags: [{type: "SelectsOptions", id: "SELECT"}]
         }),
         updateConfig: builder.mutation<ConfigurationType, Partial<ConfigurationType> & { key: string }>({
             query: ({key, ...patch}) => ({
-                url: `config.json`,
+                url: `config`,
                 method: "POST",
                 body: {key, ...patch}
             }),
@@ -77,16 +96,46 @@ export const calculatorAPI = createApi({
                     patchResult.undo();
                 }
             },
+        }),
+        updateSelectOptions: builder.mutation<SelectType, Partial<SelectType>>({
+            query: ({...path}) => ({
+                url: 'select',
+                method: "POST",
+                body: {...path}
+            }),
+            invalidatesTags: [{type: "SelectsOptions", id: "SELECT"}],
+            async onQueryStarted({...patch}, {dispatch, queryFulfilled}) {
+                const patchResult = dispatch(
+                    calculatorAPI.util.updateQueryData('getSelectOptions', undefined, (draft) => {
+                        Object.keys(patch).forEach((key) => {
+                            (draft as any)[key] = patch[key as keyof SelectType];
+                        });
+                    })
+                )
+                try {
+                    await queryFulfilled;
+                } catch {
+                    patchResult.undo();
+                }
+            },
+
         })
     })
 })
 
-export const {useGetMaterialsQuery, useGetConfigQuery, useUpdateConfigMutation} = calculatorAPI;
+export const {
+    useGetMaterialsQuery,
+    useGetConfigQuery,
+    useUpdateConfigMutation,
+    useGetSelectOptionsQuery,
+    useUpdateSelectOptionsMutation,
+} = calculatorAPI;
 
 
 //types
 
 
-export type MaterialsType = z.infer<typeof Materials>;
+export type MaterialsType = Remap<z.infer<typeof Materials>>;
 export type ConfigurationType = z.infer<typeof Configuration>;
+export type SelectType = z.infer<typeof SelectsOptions>
 
