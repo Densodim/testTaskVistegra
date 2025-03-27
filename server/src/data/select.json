@@ -1,6 +1,6 @@
 {
   "listValue": "Лист-9 0.3 ширина 0.5м",
-  "pipeValue": "",
-  "choiceOfFrame": "",
-  "choiceOfMaterial": ""
+  "pipeValue": "Труба 30х30",
+  "choiceOfFrame": "standard",
+  "choiceOfMaterial": "metal"
 }

@@ -1,9 +1,11 @@
 import style from './InputForm.module.css';
 import {
-    ConfigurationType,
-    MaterialsType,
+    ConfigurationApiType,
+    MaterialsApiType,
+    SelectApiType,
     useGetConfigQuery,
     useGetMaterialsQuery,
+    useGetSelectOptionsQuery,
     useUpdateConfigMutation,
     useUpdateSelectOptionsMutation
 } from "../../redux/services/calculatorApi.ts";
@@ -17,20 +19,13 @@ function InputForm() {
 
     const {data: materials, error: materialsError, isLoading: materialsIsLoading} = useGetMaterialsQuery();
     const {data: config, error: configError, isLoading: configIsLoading} = useGetConfigQuery();
+    const {data: selectValue} = useGetSelectOptionsQuery()
+
+    const [choiceOfMaterial, setChoiceOfMaterial] = useState('');
+    const [choiceOfFrame, setChoiceOfFrame] = useState('');
 
     const [updateConfig] = useUpdateConfigMutation();
     const [updateSelectOptions] = useUpdateSelectOptionsMutation();
-
-    const [listValue, setListValue] = useState('');
-    const [pipeValue, setPipeValue] = useState('');
-    const [choiceOfFrame, setChoiceOfFrame] = useState('');
-    const [choiceOfMaterial, setChoiceOfMaterial] = useState('');
-
-
-    // const sizeConfig = config?.find((item)=>item.key === 'width');
-    // const minValue = sizeConfig?.min || 0;
-
-    // const [minConfig, setMinConfig] = useState<number>(minValue);
 
 
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>, type: OptionSelectType) => {
@@ -38,17 +33,30 @@ function InputForm() {
         switch (type) {
             case "list":
                 updateSelectOptions({listValue: selectValue});
-                setListValue(selectValue);
                 break;
             case "pipe":
-                setPipeValue(selectValue)
+                updateSelectOptions({pipeValue: selectValue});
                 break;
-            case "material":
-                setChoiceOfMaterial(selectValue)
+            case "material": {
+                const selectedKey = config?.find(({name}) => name === selectValue);
+                if (selectedKey?.key) {
+                    setChoiceOfMaterial(selectValue)
+                    updateSelectOptions({
+                        choiceOfMaterial: selectedKey.key as SelectApiType['choiceOfMaterial']
+                    });
+                }
                 break;
-            case "frame":
-                setChoiceOfFrame(selectValue)
+            }
+            case "frame": {
+                const selectedKey = config?.find(({name}) => name === selectValue);
+                if (selectedKey?.key) {
+                    setChoiceOfFrame(selectValue)
+                    updateSelectOptions({
+                        choiceOfFrame: selectedKey.key as SelectApiType['choiceOfFrame']
+                    });
+                }
                 break;
+            }
         }
     };
 
@@ -104,6 +112,19 @@ function InputForm() {
         }));
     }, [config]);
 
+    useEffect(() => {
+        if (selectValue) {
+            const choiceOfFrameName = config?.find(({key}) => key === selectValue.choiceOfFrame);
+            const choiceOfMaterialName = config?.find(({key}) => key === selectValue.choiceOfMaterial);
+            if (choiceOfFrameName) {
+                setChoiceOfFrame(choiceOfFrameName.name);
+            }
+            if (choiceOfMaterialName) {
+                setChoiceOfMaterial(choiceOfMaterialName.name);
+            }
+        }
+    }, [selectValue, config]);
+
     const handleChange = async (key: any, value: number) => {
         setForm((prev) => ({...prev, [key]: value}));
 
@@ -123,12 +144,12 @@ function InputForm() {
                 <div className={style.inputSection}>
 
                     <label>Покрытие:</label>
-                    <select onChange={(e) => handleSelectChange(e, 'list')} value={listValue}>
+                    <select onChange={(e) => handleSelectChange(e, 'list')} value={selectValue?.listValue}>
                         {optionSelect('list')}
                     </select>
 
                     <label>Труба:</label>
-                    <select onChange={(e) => handleSelectChange(e, 'pipe')} value={pipeValue}>
+                    <select onChange={(e) => handleSelectChange(e, 'pipe')} value={selectValue?.pipeValue}>
                         {optionSelect('pipe')}
                     </select>
 
@@ -149,12 +170,10 @@ function InputForm() {
                     <select onChange={(e) => handleSelectChange(e, 'frame')} value={choiceOfFrame}>
                         {optionSelect('frame')}
                     </select>
-
-                    <button>Рассчитать</button>
                 </div>
 
                 <div className='results'>
-                    <Results pipeValue={pipeValue}/>
+                    <Results/>
                 </div>
 
             </>
@@ -174,8 +193,9 @@ function InputForm() {
 export default InputForm;
 
 // types
-type OptionSelectType = MaterialsType['type'] | ConfigurationType['type']
-type SizeConfigType = ConfigurationType['key']
+type OptionSelectType = MaterialsApiType['type'] | ConfigurationApiType['type']
+type SizeConfigType = ConfigurationApiType['key']
 
-export type GetSizeConfigType = AllOrNone<ConfigurationType, 'min' | 'max' | 'step' | 'value'>
+export type GetSizeConfigType = AllOrNone<ConfigurationApiType, 'min' | 'max' | 'step' | 'value'>
+
 

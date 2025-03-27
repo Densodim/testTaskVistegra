@@ -64,19 +64,19 @@ export const calculatorAPI = createApi({
     baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:3001/'}),
     tagTypes: ["Materials", "Config", "SelectsOptions"],
     endpoints: (builder) => ({
-        getMaterials: builder.query<MaterialsType[], void>({
+        getMaterials: builder.query<MaterialsApiType[], void>({
             query: () => 'materials',
             providesTags: [{type: "Materials", id: "LIST"}]
         }),
-        getConfig: builder.query<ConfigurationType[], void>({
+        getConfig: builder.query<ConfigurationApiType[], void>({
             query: () => `config`,
             providesTags: [{type: "Config", id: "SETTINGS"}],
         }),
-        getSelectOptions: builder.query<SelectType, void>({
+        getSelectOptions: builder.query<SelectApiType, void>({
             query: () => 'select',
             providesTags: [{type: "SelectsOptions", id: "SELECT"}]
         }),
-        updateConfig: builder.mutation<ConfigurationType, Partial<ConfigurationType> & { key: string }>({
+        updateConfig: builder.mutation<ConfigurationApiType, Partial<ConfigurationApiType> & { key: string }>({
             query: ({key, ...patch}) => ({
                 url: `config`,
                 method: "POST",
@@ -97,7 +97,7 @@ export const calculatorAPI = createApi({
                 }
             },
         }),
-        updateSelectOptions: builder.mutation<SelectType, Partial<SelectType>>({
+        updateSelectOptions: builder.mutation<SelectApiType, Partial<SelectApiType>>({
             query: ({...path}) => ({
                 url: 'select',
                 method: "POST",
@@ -105,10 +105,11 @@ export const calculatorAPI = createApi({
             }),
             invalidatesTags: [{type: "SelectsOptions", id: "SELECT"}],
             async onQueryStarted({...patch}, {dispatch, queryFulfilled}) {
+
                 const patchResult = dispatch(
                     calculatorAPI.util.updateQueryData('getSelectOptions', undefined, (draft) => {
                         Object.keys(patch).forEach((key) => {
-                            (draft as any)[key] = patch[key as keyof SelectType];
+                            (draft as any)[key] = patch[key as keyof SelectApiType];
                         });
                     })
                 )
@@ -135,7 +136,7 @@ export const {
 //types
 
 
-export type MaterialsType = Remap<z.infer<typeof Materials>>;
-export type ConfigurationType = z.infer<typeof Configuration>;
-export type SelectType = z.infer<typeof SelectsOptions>
+export type MaterialsApiType = Remap<z.infer<typeof Materials>>;
+export type ConfigurationApiType = z.infer<typeof Configuration>;
+export type SelectApiType = z.infer<typeof SelectsOptions>
 

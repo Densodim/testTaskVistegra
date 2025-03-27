@@ -8,19 +8,17 @@ const HEADER = {
     sum: 'Сумма'
 } as const;
 
-function Results({pipeValue}: Props) {
+function Results() {
 
     const {data: materials} = useGetMaterialsQuery();
     const {data: config} = useGetConfigQuery();
     const {data: selectOptions} = useGetSelectOptionsQuery();
 
-    console.log(selectOptions);
-
-
     const selectList = materials?.find((el) => el.name === selectOptions?.listValue);
-    const selectPipe = materials?.find((el) => el.name === selectOptions?.listValue);
+    const selectPipe = materials?.find((el) => el.name === selectOptions?.pipeValue);
+    const selectFix = config?.filter(el => el.type === 'fix').find(el => el.key === selectOptions?.choiceOfMaterial);
+    console.log("selectList", selectFix);
 
-    console.log('selectList', selectList);
 
     return (
         <>
@@ -41,13 +39,14 @@ function Results({pipeValue}: Props) {
                         <td>{selectList?.unit}</td>
                     </tr>
                     <tr>
-                        <td>{pipeValue}</td>
+                        <td>{selectOptions?.pipeValue}</td>
                         <td>{selectPipe?.unit}</td>
 
                     </tr>
                     <tr>
                         <td>Саморез</td>
-
+                        <td>{selectFix?.name}</td>
+                        <td>{selectFix?.value}</td>
                     </tr>
                     </tbody>
                     <tfoot>
@@ -66,6 +65,3 @@ function Results({pipeValue}: Props) {
 export default Results;
 
 //Props
-type Props = {
-    pipeValue: string
-}
