@@ -4,7 +4,7 @@ import {GetSizeConfigType} from "../../components/InputForm/InputForm.tsx";
 
 
 function Input({...allProps}: InputProps) {
-    return (<input {...allProps} />)
+    return (<input {...allProps} onKeyDown={(e) => e.preventDefault()} />)
 }
 
 export function AComponentUsingInput({getSizeConfig, onChange, value, ...rest}: any) {
