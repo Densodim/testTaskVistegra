@@ -12,7 +12,6 @@ import {
 import {AllOrNone} from "../../type/Types.ts";
 import {AComponentUsingInput} from "../../lib/Input/Input.tsx";
 import {useEffect, useState} from "react";
-import Results from "../Results/Results.tsx";
 
 
 function InputForm() {
@@ -171,11 +170,6 @@ function InputForm() {
                         {optionSelect('frame')}
                     </select>
                 </div>
-
-                <div className='results'>
-                    <Results/>
-                </div>
-
             </>
         )
     } else {
