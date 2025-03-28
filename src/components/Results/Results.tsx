@@ -18,7 +18,6 @@ function Results() {
     const selectPipe = materials?.find((el) => el.name === selectOptions?.pipeValue);
     const selectFix = config?.filter(el => el.type === 'fix').find(el => el.key === selectOptions?.choiceOfMaterial);
     const selectFrame = config?.filter(el => el.type === 'frame').find(el => el.key === selectOptions?.choiceOfFrame);
-    console.log("selectList", selectFrame);
 
     const length = config?.find(el => el.key === 'length')?.value || 0;
     const width = config?.find(el => el.key === 'width')?.value || 0;
