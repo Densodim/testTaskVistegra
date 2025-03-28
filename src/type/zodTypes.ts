@@ -19,7 +19,10 @@ export const Materials = z.object({
     ]),
     width: z.number().optional(),
     price: z.number().min(0),
-})
+}).refine(val => val.width !== undefined, {
+    message: "Width is required",
+    path: ["width"]
+});
 
 export const Configuration = z.object({
     type: z.union([
@@ -60,5 +63,6 @@ export const SelectsOptions = z.object({
 
 //types
 export type MaterialsApiType = Remap<z.infer<typeof Materials>>;
+export type MaterialsApiTypeOut = z.output<typeof Materials>;
 export type ConfigurationApiType = z.infer<typeof Configuration>;
 export type SelectApiType = z.infer<typeof SelectsOptions>

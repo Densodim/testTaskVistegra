@@ -1,5 +1,5 @@
 import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
-import {ConfigurationApiType, MaterialsApiType, SelectApiType} from "../../type/zodTypes.ts";
+import {ConfigurationApiType, MaterialsApiTypeOut, SelectApiType} from "../../type/zodTypes.ts";
 
 
 export const calculatorAPI = createApi({
@@ -7,7 +7,7 @@ export const calculatorAPI = createApi({
     baseQuery: fetchBaseQuery({baseUrl: 'http://localhost:3001/'}),
     tagTypes: ["Materials", "Config", "SelectsOptions"],
     endpoints: (builder) => ({
-        getMaterials: builder.query<MaterialsApiType[], void>({
+        getMaterials: builder.query<MaterialsApiTypeOut[], void>({
             query: () => 'materials',
             providesTags: [{type: "Materials", id: "LIST"}]
         }),

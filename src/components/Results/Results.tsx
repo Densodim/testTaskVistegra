@@ -14,31 +14,33 @@ function Results() {
     const {data: config} = useGetConfigQuery();
     const {data: selectOptions} = useGetSelectOptionsQuery();
 
+
     const selectList = materials?.find((el) => el.name === selectOptions?.listValue);
     const selectPipe = materials?.find((el) => el.name === selectOptions?.pipeValue);
     const selectFix = config?.filter(el => el.type === 'fix').find(el => el.key === selectOptions?.choiceOfMaterial);
     const selectFrame = config?.filter(el => el.type === 'frame').find(el => el.key === selectOptions?.choiceOfFrame);
+
 
     const length = config?.find(el => el.key === 'length')?.value || 0;
     const width = config?.find(el => el.key === 'width')?.value || 0;
 
     // Количество листов
     const sheetArea = length * width;
-    const sheetWidth = selectList?.width as number;
+    const sheetWidth = selectList?.width ?? 0;
     const sheetsRequired = Math.ceil(sheetArea / sheetWidth);
-    const sheetsRequiredCount = sheetsRequired * (selectList?.price as number);
+    const sheetsRequiredCount = sheetsRequired * (selectList?.price ?? 0);
 
     // Количество трубы в метрах
-    const pipeWidthMeters = (selectPipe?.width as number) / 1000;
-    const step = selectFrame?.step as number;
+    const pipeWidthMeters = (selectPipe?.width ?? 0) / 1000;
+    const step = selectFrame?.step ?? 0;
     const horizontalPipes = Math.ceil(length / step) + 1;
     const verticalPipes = Math.ceil(width / step) + 1;
     const totalPipes = (horizontalPipes * width) + (verticalPipes * length);
     const totalPipeLength = Math.round(totalPipes * pipeWidthMeters);
-    const totalPipeLengthCount = totalPipeLength * (selectPipe?.price as number);
+    const totalPipeLengthCount = totalPipeLength * (selectPipe?.price ?? 0);
 
     // Количество саморезов
-    const screwsPerSquareMeter = selectFix?.value as number;
+    const screwsPerSquareMeter = selectFix?.value ?? 0;
     const totalScrews = Math.ceil(sheetArea * screwsPerSquareMeter);
 
     // Расчетный размер ячейки

@@ -42,3 +42,9 @@ export type AllOrNone<T, Keys extends keyof T> = (
 export type Remap<T> = {
     [K in keyof T]: T[K]
 }
+
+export type DeepPartial<T> = T extends object
+    ? T
+    : {
+        [K in keyof T]: T[K]
+    };

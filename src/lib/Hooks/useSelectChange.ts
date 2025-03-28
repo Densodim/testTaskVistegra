@@ -1,8 +1,12 @@
 import {SelectApiType} from "../../type/zodTypes.ts";
 import {useGetConfigQuery, useUpdateSelectOptionsMutation} from "../../redux/services/calculatorApi.ts";
 import {OptionSelectType} from "../../components/InputForm/InputForm.tsx";
+import React, {Dispatch, SetStateAction} from "react";
 
-export const useSelectChange = (setChoiceOfFrame:any, setChoiceOfMaterial:any) => {
+export const useSelectChange = (
+    setChoiceOfFrame: Dispatch<SetStateAction<string>>,
+    setChoiceOfMaterial: Dispatch<SetStateAction<string>>
+) => {
 
     const [updateSelectOptions] = useUpdateSelectOptionsMutation();
     const {data: config} = useGetConfigQuery();
