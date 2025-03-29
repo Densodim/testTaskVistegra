@@ -22,7 +22,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+
+    //any
+    "exactOptionalPropertyTypes": true
   },
   "include": ["src"]
 }

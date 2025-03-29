@@ -1,41 +1,41 @@
 .inputSection {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 20px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	background-color: #f9f9f9;
+	width: 100%;
 }
 
 .inputSection h2 {
-    margin-bottom: 10px;
-    font-size: 18px;
+	margin-bottom: 10px;
+	font-size: 18px;
 }
 
 .inputSection label {
-    font-weight: bold;
+	font-weight: bold;
 }
 
 .inputSection select,
 .inputSection input {
-    padding: 8px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+	padding: 8px;
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
 }
 
 .inputSection button {
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    font-size: 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+	padding: 10px;
+	background-color: #007bff;
+	color: white;
+	font-size: 16px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
 }
 
 .inputSection button:hover {
-    background-color: #0056b3;
+	background-color: #0056b3;
 }
